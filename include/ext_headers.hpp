@@ -24,8 +24,8 @@
  *                                                                                       *
  *****************************************************************************************/
 
-#ifndef CONSOLECONTROL_WARN_HPP
-#define CONSOLECONTROL_WARN_HPP
+#ifndef BASECONVERTER_EXT_HEADERS_HPP
+#define BASECONVERTER_EXT_HEADERS_HPP
 
 
 #if defined(_MSC_VER)
@@ -48,4 +48,4 @@ _Pragma("GCC diagnostic pop")
 #endif
 
 
-#endif //CONSOLECONTROL_WARN_HPP
+#endif //BASECONVERTER_EXT_HEADERS_HPP

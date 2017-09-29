@@ -26,8 +26,8 @@
 
 // Based on functions from gpulib by procedural (https://github.com/procedural/gpulib)
 
-#ifndef CONSOLECONTROL_IMGUI_EASY_THEMING_HPP
-#define CONSOLECONTROL_IMGUI_EASY_THEMING_HPP
+#ifndef BASECONVERTER_IMGUI_EASY_THEMING_HPP
+#define BASECONVERTER_IMGUI_EASY_THEMING_HPP
 
 
 #include <ext_headers.hpp>
@@ -65,4 +65,4 @@ struct ImGuiColorTheme {
 void ImGuiEasyTheming(ImGuiColorTheme theme);
 
 
-#endif //CONSOLECONTROL_IMGUI_EASY_THEMING_HPP
+#endif //BASECONVERTER_IMGUI_EASY_THEMING_HPP
