@@ -31,21 +31,20 @@ EXT_HEADERS_OPEN
 #include <cstring>
 EXT_HEADERS_CLOSE
 
-bool ulltostr(unsigned long long value, int base, char* str, size_t sz){
-	if(value == 0){
+bool ulltostr(unsigned long long value, int base, char* str, size_t sz) {
+	if(value == 0) {
 		str[0] = '0';
 		str[1] = '\0';
 		return true;
 	}
 
-	if(base < 2){
+	if(base < 2) {
 		str[0] = '\0';
 		return false;
 	}
 
 	size_t current = 0;
-	while (value > 0)
-	{
+	while(value > 0) {
 		unsigned long long x = value % base;
 		if(x < 10)
 			str[current] = static_cast<char>('0' + x);
@@ -53,7 +52,7 @@ bool ulltostr(unsigned long long value, int base, char* str, size_t sz){
 			str[current] = static_cast<char>('A' + (x - 10));
 
 		value /= base;
-		if(current == sz){
+		if(current == sz) {
 			str[current] = '\0';
 			return false;
 		}

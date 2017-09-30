@@ -29,11 +29,13 @@
 #include <imgui_easy_theming.hpp>
 
 ImVec3::ImVec3(float x_, float y_, float z_) noexcept
-  : x(x_), y(y_), z(z_) {
+  : x(x_), y(y_), z(z_)
+{
 }
 
 ImGuiColorTheme::ImGuiColorTheme(ImVec3 text_, ImVec3 head_, ImVec3 area_, ImVec3 body_, ImVec3 pops_) noexcept
-  : text(text_), head(head_), area(area_), body(body_), pops(pops_) {
+  : text(text_), head(head_), area(area_), body(body_), pops(pops_)
+{
 
 }
 
@@ -64,7 +66,8 @@ const ImGuiColorTheme ImGuiColorTheme::MintYDark{
   ImVec3{30 / 255.f, 30 / 255.f, 30 / 255.f}
 };
 
-void ImGuiEasyTheming(ImGuiColorTheme theme) {
+void ImGuiEasyTheming(ImGuiColorTheme theme)
+{
 	ImGuiStyle& style = ImGui::GetStyle();
 
 	style.Colors[ImGuiCol_Text] = ImVec4(theme.text.x, theme.text.y, theme.text.z, 1.00f);

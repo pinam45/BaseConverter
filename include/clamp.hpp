@@ -32,13 +32,20 @@ template<typename T>
 inline T clamp(const T& v, const T& lo, const T& hi);
 
 template<typename T>
-T clamp(const T& v, const T& lo, const T& hi) {
+T clamp(const T& v, const T& lo, const T& hi)
+{
 	if(hi < lo)
+	{
 		return clamp(v, hi, lo);
+	}
 	if(v < lo)
+	{
 		return lo;
+	}
 	if(v > hi)
+	{
 		return hi;
+	}
 	return v;
 }
 

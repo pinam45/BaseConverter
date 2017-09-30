@@ -35,7 +35,8 @@ EXT_HEADERS_OPEN
 #include <imgui.h>
 EXT_HEADERS_CLOSE
 
-struct ImVec3 {
+struct ImVec3
+{
 	float x;
 	float y;
 	float z;
@@ -43,7 +44,8 @@ struct ImVec3 {
 	explicit ImVec3(float x = 0.0f, float y = 0.0f, float z = 0.0f) noexcept;
 };
 
-struct ImGuiColorTheme {
+struct ImGuiColorTheme
+{
 	ImVec3 text;
 	ImVec3 head;
 	ImVec3 area;
