@@ -42,6 +42,30 @@ function(check_variable_name _function_name)
 	endforeach()
 endfunction()
 
+## directory_is_empty(output dir)
+# Check if a directory is empty.
+# If the input directory doesn't exist or is not a directory, it is considered as empty.
+#   {variable} [out] output:   true if the directory is empty, false otherwise
+#   {value}    [in]  dir:      Directory to check
+function(directory_is_empty output dir)
+	set(tmp_output false)
+	get_filename_component(dir_path ${dir} REALPATH)
+	if(EXISTS "${dir_path}")
+		if(IS_DIRECTORY "${dir_path}")
+			file(GLOB files "${dir_path}/*")
+			list(LENGTH files len)
+			if(len EQUAL 0)
+				set(tmp_output true)
+			endif()
+		else()
+			set(tmp_output true)
+		endif()
+	else()
+		set(tmp_output true)
+	endif()
+	set(${output} ${tmp_output} PARENT_SCOPE)
+endfunction()
+
 ## split_args(left delimiter right args...)
 # Split arguments into left and right parts on delimiter token.
 #   {variable} [out] left:        Arguments at the left (before) the delimiter

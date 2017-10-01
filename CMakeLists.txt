@@ -10,17 +10,6 @@ get_filename_component(SFML_dir             ${root_dir}/deps/SFML         REALPA
 get_filename_component(imgui_dir            ${root_dir}/deps/imgui        REALPATH)
 get_filename_component(imgui-sfml_dir       ${root_dir}/deps/imgui-sfml   REALPATH)
 
-# Dependencies check
-if(NOT EXISTS "${SFML_dir}")
-	message(FATAL_ERROR "SFML dependency is missing, maybe you didn't pull the git submodules")
-endif()
-if(NOT EXISTS "${imgui_dir}")
-	message(FATAL_ERROR "ImGui dependency is missing, maybe you didn't pull the git submodules")
-endif()
-if(NOT EXISTS "${imgui-sfml_dir}")
-	message(FATAL_ERROR "ImGui-SFML dependency is missing, maybe you didn't pull the git submodules")
-endif()
-
 # By default build in Release mode
 if( NOT CMAKE_BUILD_TYPE )
 	set(CMAKE_BUILD_TYPE "Release")
@@ -31,6 +20,20 @@ add_subdirectory(${SFML_dir})
 
 # Add common CMake functions and macros
 include(common.cmake)
+
+# Dependencies check
+directory_is_empty(is_empty "${SFML_dir}")
+if(is_empty)
+	message(FATAL_ERROR "SFML dependency is missing, maybe you didn't pull the git submodules")
+endif()
+directory_is_empty(is_empty "${imgui_dir}")
+if(is_empty)
+	message(FATAL_ERROR "ImGui dependency is missing, maybe you didn't pull the git submodules")
+endif()
+directory_is_empty(is_empty "${imgui-sfml_dir}")
+if(is_empty)
+	message(FATAL_ERROR "ImGui-SFML dependency is missing, maybe you didn't pull the git submodules")
+endif()
 
 # Add _d suffix in debug mode
 set(CMAKE_DEBUG_POSTFIX _d)
