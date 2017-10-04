@@ -341,7 +341,7 @@ int main()
 		{
 			ImGui::Checkbox("Input custom bases", &inputCustomBases);
 			ImGui::Checkbox("Output default bases", &outputDefaultBases);
-			ImGui::Checkbox("Output custom base", &outputCustomBases);
+			ImGui::Checkbox("Output custom bases", &outputCustomBases);
 		}
 
 		ImGui::PopItemWidth();
