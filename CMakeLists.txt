@@ -68,7 +68,7 @@ get_files(
 make_target(
   ImGui-SFML "deps/ImGui-SFML" ${files}
   INCLUDES "${SFML_dir}/include/" "${imgui_dir}" "${imgui-sfml_dir}"
-  OPTIONS cxx no_warnings
+  OPTIONS cxx no_warnings static_runtime
 )
 target_link_libraries(ImGui-SFML PRIVATE "sfml-system" "sfml-network" "sfml-window" "sfml-graphics" "sfml-audio")
 
@@ -82,7 +82,7 @@ get_files(
 make_target(
   BaseConverter "BaseConverter" ${files}
   INCLUDES "include/" "${SFML_dir}/include/" "${imgui_dir}" "${imgui-sfml_dir}"
-  OPTIONS cxx executable
+  OPTIONS cxx executable static_runtime
 )
 target_link_libraries(BaseConverter PRIVATE "sfml-system" "sfml-window" "sfml-graphics" "ImGui-SFML")
 if(TARGET sfml-main)

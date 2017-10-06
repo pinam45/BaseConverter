@@ -474,6 +474,7 @@ function(setup_gcc target)
 	# statically link C runtime library to static_runtime targets
 	if(option_static_runtime)
 		target_add_flag(${target} "-static-libgcc")
+		target_add_flag(${target} "-static-libstdc++")
 	endif()
 
 	# manage warnings
