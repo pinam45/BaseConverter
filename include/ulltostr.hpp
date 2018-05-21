@@ -28,10 +28,7 @@
 #define BASECONVERTER_ULLTOSTR_HPP
 
 
-#include <ext_headers.hpp>
-EXT_HEADERS_OPEN
 #include <cstdio>
-EXT_HEADERS_CLOSE
 
 bool ulltostr(unsigned long long value, int base, char* str, size_t sz);
 

@@ -26,10 +26,8 @@
 
 #include <ulltostr.hpp>
 
-EXT_HEADERS_OPEN
 #include <algorithm>
 #include <cstring>
-EXT_HEADERS_CLOSE
 
 bool ulltostr(unsigned long long value, int base, char* str, size_t sz) {
 	if(value == 0) {

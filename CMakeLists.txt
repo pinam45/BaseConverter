@@ -81,7 +81,8 @@ get_files(
 )
 make_target(
   BaseConverter "BaseConverter" ${files}
-  INCLUDES "include/" "${SFML_dir}/include/" "${imgui_dir}" "${imgui-sfml_dir}"
+  INCLUDES "include/"
+  EXT_INCLUDES "${SFML_dir}/include/" "${imgui_dir}" "${imgui-sfml_dir}"
   OPTIONS cxx executable static_runtime
 )
 target_link_libraries(BaseConverter PRIVATE "sfml-system" "sfml-window" "sfml-graphics" "ImGui-SFML")

@@ -24,9 +24,6 @@
  *                                                                                       *
  *****************************************************************************************/
 
-#include <ext_headers.hpp>
-
-EXT_HEADERS_OPEN
 #include <SFML/Graphics/RenderWindow.hpp>
 #include <SFML/System/Clock.hpp>
 #include <SFML/Window/Event.hpp>
@@ -36,7 +33,6 @@ EXT_HEADERS_OPEN
 
 #include <iostream>
 #include <cstring>
-EXT_HEADERS_CLOSE
 
 #include <imgui_easy_theming.hpp>
 #include <ulltostr.hpp>

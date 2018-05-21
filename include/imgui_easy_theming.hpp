@@ -30,10 +30,7 @@
 #define BASECONVERTER_IMGUI_EASY_THEMING_HPP
 
 
-#include <ext_headers.hpp>
-EXT_HEADERS_OPEN
 #include <imgui.h>
-EXT_HEADERS_CLOSE
 
 struct ImVec3
 {
