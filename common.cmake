@@ -341,6 +341,20 @@ function(target_add_includes target)
 	target_include_directories(${target} PRIVATE ${ARGN})
 endfunction()
 
+## target_add_system_includes(target includes...)
+# Add input system includes (files or directories) to target.
+#   {value} [in] target:     Target to add includes
+#   {value} [in] includes:   Includes to add
+function(target_add_system_includes target)
+	list(LENGTH ARGN size)
+	if(NOT ${size} GREATER 0)
+		return()
+	endif()
+	list(REMOVE_DUPLICATES ARGN)
+	list(SORT ARGN)
+	target_include_directories(${target} SYSTEM PRIVATE ${ARGN})
+endfunction()
+
 ## target_add_flag(target flag [configs...])
 # Add a flag to the compiler arguments of the target for the specified configs.
 # Add the flag only if the compiler support it (checked with CHECK_CXX_COMPILER_FLAG)
@@ -371,19 +385,51 @@ function(target_add_flag target flag)
 endfunction()
 
 ## target_set_output_directory(target directory)
-# Set the target output directory to <input directory>/<config>.
+# Set the target runtime, library and archive output directory to the input directory.
 #   {value} [in] target:      Target to configure
 #   {value} [in] directory:   Output directory
 function(target_set_output_directory target directory)
+	target_set_runtime_output_directory(${target} "${directory}")
+	target_set_library_output_directory(${target} "${directory}")
+	target_set_archive_output_directory(${target} "${directory}")
+endfunction()
+
+## target_set_runtime_output_directory(target directory)
+# Set the target runtime output directory to the input directory.
+#   {value} [in] target:      Target to configure
+#   {value} [in] directory:   Output directory
+function(target_set_runtime_output_directory target directory)
 	set_target_properties(${target} PROPERTIES
 	  RUNTIME_OUTPUT_DIRECTORY                "${directory}"
-	  RUNTIME_OUTPUT_DIRECTORY_DEBUG          "${directory}/Debug"
-	  RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${directory}/RelWithDebInfo"
-	  RUNTIME_OUTPUT_DIRECTORY_RELEASE        "${directory}/Release"
+	  RUNTIME_OUTPUT_DIRECTORY_DEBUG          "${directory}"
+	  RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO "${directory}"
+	  RUNTIME_OUTPUT_DIRECTORY_RELEASE        "${directory}"
+	  )
+endfunction()
+
+## target_set_library_output_directory(target directory)
+# Set the target library output directory to the input directory.
+#   {value} [in] target:      Target to configure
+#   {value} [in] directory:   Output directory
+function(target_set_library_output_directory target directory)
+	set_target_properties(${target} PROPERTIES
 	  LIBRARY_OUTPUT_DIRECTORY                "${directory}"
-	  LIBRARY_OUTPUT_DIRECTORY_DEBUG          "${directory}/Debug"
-	  LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${directory}/RelWithDebInfo"
-	  LIBRARY_OUTPUT_DIRECTORY_RELEASE        "${directory}/Release"
+	  LIBRARY_OUTPUT_DIRECTORY_DEBUG          "${directory}"
+	  LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO "${directory}"
+	  LIBRARY_OUTPUT_DIRECTORY_RELEASE        "${directory}"
+	  )
+endfunction()
+
+## target_set_archive_output_directory(target directory)
+# Set the target archive output directory to the input directory.
+#   {value} [in] target:      Target to configure
+#   {value} [in] directory:   Output directory
+function(target_set_archive_output_directory target directory)
+	set_target_properties(${target} PROPERTIES
+	  ARCHIVE_OUTPUT_DIRECTORY                "${directory}"
+	  ARCHIVE_OUTPUT_DIRECTORY_DEBUG          "${directory}"
+	  ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO "${directory}"
+	  ARCHIVE_OUTPUT_DIRECTORY_RELEASE        "${directory}"
 	  )
 endfunction()
 
@@ -455,7 +501,7 @@ function(setup_msvc target)
 endfunction()
 
 ## setup_gcc(target [OPTIONS [static_runtime] [c] [cxx] [no_warnings] [low_warnings]])
-# Set up msvc-specific options of the target.
+# Set up gcc-specific options of the target.
 # Without options: maximum warnings are enabled.
 #   {value}  [in] target:           Target to configure
 #   {option} [in] static_runtime:   If present, C runtime library is statically linked
@@ -517,6 +563,7 @@ function(setup_gcc target)
 		  "-Wcast-align"
 		  "-Wwrite-strings"
 		  "-Wconversion"
+		  "-Wsign-conversion"
 		  "-Wdate-time"
 		  "-Wextra-semi"
 		  "-Wlogical-op"
@@ -526,10 +573,27 @@ function(setup_gcc target)
 		  #"-Winline"
 		  "-Winvalid-pch"
 		  "-Woverlength-strings"
+		  "-Wformat=2"
+		  "-Wformat-signedness"
+		  "-Winit-self"
+
+		  ## Optimisation dependant flags
+		  "-Wstrict-overflow=5"
+
+		  ## Info flags
+		  #"-Winvalid-pch"
+		  #"-Wvolatile-register-var"
+		  #"-Wdisabled-optimization"
+		  #"-Woverlength-strings"
+		  #"-Wunsuffixed-float-constants"
+		  #"-Wvector-operation-performance"
 
 		  ## Apocalypse flags:
 		  #"-Wsystem-headers"
 		  #"-Werror"
+
+		  ## Exit on first error
+		  "-Wfatal-errors"
 		  )
 		if(option_c)
 			set(c_flags
@@ -548,18 +612,166 @@ function(setup_gcc target)
 		endif()
 		if(option_cxx)
 			set(cxx_flags
-			  "-Wsuggest-override"
 			  "-Wzero-as-null-pointer-constant"
 			  "-Wsubobject-linkage"
 			  "-Wdelete-incomplete"
 			  "-Wuseless-cast"
+			  "-Wctor-dtor-privacy"
+			  "-Wnoexcept"
+			  "-Wregister"
+			  "-Wstrict-null-sentinel"
+			  "-Wold-style-cast"
+			  "-Woverloaded-virtual"
+
+			  ## Suggestions
+			  "-Wsuggest-override"
+			  #"-Wsuggest-final-types"
+			  #"-Wsuggest-final-methods"
+			  #"-Wsuggest-attribute=pure"
+			  #"-Wsuggest-attribute=const"
+			  #"-Wsuggest-attribute=noreturn"
+			  #"-Wsuggest-attribute=format"
+
+			  ## Guidelines from Scott Meyers’ Effective C++ series of books
+			  "-Weffc++"
+
+			  ## Special purpose
+			  #"-Wsign-promo"
+			  #"-Wtemplates"
+			  #"-Wmultiple-inheritance"
+			  #"-Wvirtual-inheritance"
+			  #"-Wnamespaces"
+
+			  ## Standard versions
 			  #"-Wc++11-compat"
 			  #"-Wc++14-compat"
-			  #"-Wc++1z-compat"
+			  #"-Wc++17-compat"
 			  )
 		endif()
 	endif()
 	foreach(flag IN ITEMS ${flags} ${c_flags} ${cxx_flags})
+		target_add_flag(${target} ${flag})
+	endforeach()
+endfunction()
+
+## setup_clang(target [OPTIONS [static_runtime] [no_warnings] [low_warnings]])
+# Set up clang-specific options of the target.
+# Without options: maximum warnings are enabled.
+#   {value}  [in] target:           Target to configure
+#   {option} [in] static_runtime:   If present, C runtime library is statically linked
+#   {option} [in] no_warnings:      If present, warnings are disabled (useful for external projects)
+#   {option} [in] low_warnings:     If present, low/normal warnings are enabled
+function(setup_clang target)
+	split_args(ignore "OPTIONS" options ${ARGN})
+	has_item(option_static_runtime "static_runtime" ${options})
+	has_item(option_no_warnings "no_warnings" ${options})
+	has_item(option_low_warnings "low_warnings" ${options})
+
+	# statically link C runtime library to static_runtime targets
+	if(option_static_runtime)
+		target_add_flag(${target} "-static-libgcc")
+		target_add_flag(${target} "-static-libstdc++")
+	endif()
+
+	# manage warnings
+	set(flags)
+	if(option_no_warnings)
+		set(flags "-Wno-everything")
+	elseif(option_low_warnings)
+		set(flags "-pedantic" "-Wall")
+	else()
+		set(flags
+		  ## Base flags:
+		  "-pedantic"
+		  "-Wall"
+		  "-Wextra"
+
+		  ## Extra flags:
+		  "-Wbad-function-cast"
+		  "-Wcomplex-component-init"
+		  "-Wconditional-uninitialized"
+		  "-Wcovered-switch-default"
+		  "-Wcstring-format-directive"
+		  "-Wdelete-non-virtual-dtor"
+		  "-Wdeprecated"
+		  "-Wdollar-in-identifier-extension"
+		  "-Wdouble-promotion"
+		  "-Wduplicate-enum"
+		  "-Wduplicate-method-arg"
+		  "-Wembedded-directive"
+		  "-Wexpansion-to-defined"
+		  "-Wextended-offsetof"
+		  "-Wfloat-conversion"
+		  "-Wfloat-equal"
+		  "-Wfor-loop-analysis"
+		  "-Wformat-pedantic"
+		  "-Wgnu"
+		  "-Wimplicit-fallthrough"
+		  "-Winfinite-recursion"
+		  "-Winvalid-or-nonexistent-directory"
+		  "-Wkeyword-macro"
+		  "-Wmain"
+		  "-Wmethod-signatures"
+		  "-Wmicrosoft"
+		  "-Wmismatched-tags"
+		  "-Wmissing-field-initializers"
+		  "-Wmissing-method-return-type"
+		  "-Wmissing-prototypes"
+		  "-Wmissing-variable-declarations"
+		  "-Wnested-anon-types"
+		  "-Wnon-virtual-dtor"
+		  "-Wnonportable-system-include-path"
+		  "-Wnull-pointer-arithmetic"
+		  "-Wnullability-extension"
+		  "-Wold-style-cast"
+		  "-Woverriding-method-mismatch"
+		  "-Wpacked"
+		  "-Wpedantic"
+		  "-Wpessimizing-move"
+		  "-Wredundant-move"
+		  "-Wreserved-id-macro"
+		  "-Wself-assign"
+		  "-Wself-move"
+		  "-Wsemicolon-before-method-body"
+		  "-Wshadow"
+		  "-Wshadow-field"
+		  "-Wshadow-field-in-constructor"
+		  "-Wshadow-uncaptured-local"
+		  "-Wshift-sign-overflow"
+		  "-Wshorten-64-to-32"
+		  #"-Wsign-compare"
+		  #"-Wsign-conversion"
+		  "-Wsigned-enum-bitfield"
+		  "-Wstatic-in-inline"
+		  #"-Wstrict-prototypes"
+		  #"-Wstring-conversion"
+		  #"-Wswitch-enum"
+		  "-Wtautological-compare"
+		  "-Wtautological-overlap-compare"
+		  "-Wthread-safety"
+		  "-Wundefined-reinterpret-cast"
+		  "-Wuninitialized"
+		  #"-Wunknown-pragmas"
+		  "-Wunreachable-code"
+		  "-Wunreachable-code-aggressive"
+		  #"-Wunused"
+		  "-Wunused-const-variable"
+		  "-Wunused-lambda-capture"
+		  "-Wunused-local-typedef"
+		  "-Wunused-parameter"
+		  "-Wunused-private-field"
+		  "-Wunused-template"
+		  "-Wunused-variable"
+		  "-Wused-but-marked-unused"
+		  "-Wzero-as-null-pointer-constant"
+		  "-Wzero-length-array"
+
+		  ## Info flags
+		  "-Wcomma"
+		  "-Wcomment"
+		  )
+	endif()
+	foreach(flag ${flags})
 		target_add_flag(${target} ${flag})
 	endforeach()
 endfunction()
@@ -575,12 +787,14 @@ function(setup_target target)
 		setup_msvc(${target} OPTIONS ${ARGN})
 	elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "GNU" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "GNU")
 		setup_gcc(${target} OPTIONS ${ARGN})
+	elseif("${CMAKE_CXX_COMPILER_ID}" STREQUAL "Clang" OR "${CMAKE_C_COMPILER_ID}" STREQUAL "Clang")
+		setup_clang(${target} OPTIONS ${ARGN})
 	else()
-		message(FATAL_ERROR "unsupported compiler ${CMAKE_CXX_COMPILER_ID}")
+		message(WARNING "Unsupported compiler (${CMAKE_CXX_COMPILER_ID}) setup")
 	endif()
 endfunction()
 
-## make_target(target group files... [INCLUDES includes...]
+## make_target(target group files... [INCLUDES includes...] [EXT_INCLUDES ext_includes...]
 ##     [OPTIONS [executable] [test] [shared] [static_runtime] [c] [cxx] [no_warnings] [low_warnings]])
 # Make a new target with the input options
 # By default targets are static libraries.
@@ -588,6 +802,7 @@ endfunction()
 #   {value}  [in] group:            Group of the target (can contain '/'' for subgroups)
 #   {value}  [in] files:            Source files
 #   {value}  [in] includes:         Include files
+#   {value}  [in] ext_includes:     External include files (no warnings)
 #   {option} [in] executable:       If present, build an executable
 #   {option} [in] test:             If present, build a test executable
 #   {option} [in] shared:           If present, build a shared library
@@ -601,10 +816,12 @@ function(make_target target group)
 
 	# initialize additional include directory list
 	set(includes)
+	set(ext_includes)
 
 	# get options
 	split_args(inputs "OPTIONS" options ${ARGN})
-	split_args(files "INCLUDES" includes ${inputs})
+	split_args(inputs2 "EXT_INCLUDES" ext_includes ${inputs})
+	split_args(files "INCLUDES" includes ${inputs2})
 	has_item(is_executable "executable" ${options})
 	has_item(is_test "test" ${options})
 	has_item(is_shared "shared" ${options})
@@ -630,11 +847,24 @@ function(make_target target group)
 
 	# add all additional include directories
 	target_add_includes(${target} ${includes})
+	target_add_system_includes(${target} ${ext_includes})
 
 	# set directories for IDE
 	source_group(CMake REGULAR_EXPRESSION ".*[.](cmake|rule)$")
 	source_group(CMake FILES "CMakeLists.txt")
 	set_target_properties(${target} PROPERTIES FOLDER ${group})
+endfunction()
+
+## configure_folder(input_folder output_folder)
+# Recursively copie all files from an input folder to an output folder
+#   {value} [in] input_folder:    Input folder
+#   {value} [in] output_folder:   Output folder
+function(configure_folder input_folder output_folder)
+	file(GLOB_RECURSE files "${input_folder}" "${input_folder}/*")
+	foreach(file ${files})
+		file(RELATIVE_PATH relative_file ${input_folder} ${file})
+		configure_file(${file} "${output_folder}/${relative_file}" COPYONLY)
+	endforeach()
 endfunction()
 
 
@@ -652,10 +882,19 @@ set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
 # place generated binaries in build/bin
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/bin)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/build/bin/)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/build/bin/)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/build/bin/)
 
 # place generated libs in build/lib
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/build/lib/)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/build/lib/)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/build/lib/)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/build/lib/)
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/build/lib/)
+set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/build/lib/)
 
 # enable IDE folders
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
@@ -677,7 +916,7 @@ if(MSVC)
 	add_cx_flag(${target} "/Ox" RELEASE)
 
 	# enables automatic parallelization of loops
-	#add_cx_flag(${target} "/Qpar" RELEASE)
+	add_cx_flag(${target} "/Qpar" RELEASE)
 
 	# enable runtime checks
 	add_cx_flag("/RTC1" DEBUG)
