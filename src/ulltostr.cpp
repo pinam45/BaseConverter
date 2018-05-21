@@ -29,7 +29,7 @@
 #include <algorithm>
 #include <cstring>
 
-bool ulltostr(unsigned long long value, int base, char* str, size_t sz) {
+bool ulltostr(unsigned long long int value, unsigned int base, char* str, size_t sz) {
 	if(value == 0) {
 		str[0] = '0';
 		str[1] = '\0';

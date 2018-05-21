@@ -61,10 +61,10 @@ struct TextFilters
 
 struct BaseBlock
 {
-	int base;
+	unsigned int base;
 	char txt[128];
 
-	explicit BaseBlock(int base_ = 10, const char* txt_ = "0")
+	explicit BaseBlock(unsigned int base_ = 10, const char* txt_ = "0")
 	  : base(base_), txt()
 	{
 		std::strncpy(txt, txt_, 128);
@@ -199,8 +199,9 @@ int main()
 				                           ImGuiInputTextFlags_CharsUppercase | ImGuiInputTextFlags_CharsNoBlank |
 				                           ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_CallbackCharFilter,
 				                           TextFilters::filterBase, &input.base);
-				baseUpd |= ImGui::DragInt("Base", &input.base, 1, minBase, maxBase, "%.0f");
-				input.base = clamp(input.base, minBase, maxBase);
+				int base = static_cast<int>(input.base);
+				baseUpd |= ImGui::DragInt("Base", &base, 1, minBase, maxBase, "%.0f");
+				input.base = static_cast<unsigned int>(clamp(base, minBase, maxBase));
 				ImGui::PopItemWidth();
 			}
 			else
@@ -225,7 +226,7 @@ int main()
 		if(valUpd)
 		{
 			errno = 0;
-			value = std::strtoull(input.txt, nullptr, input.base);
+			value = std::strtoull(input.txt, nullptr, static_cast<int>(input.base));
 			tooBig = errno != 0;
 
 			if(tooBig)
@@ -306,9 +307,11 @@ int main()
 					ImGui::PushID(&baseBlock);
 					ImGui::InputText("Value", baseBlock.txt, sizeof(baseBlock.txt),
 					                 ImGuiInputTextFlags_AutoSelectAll | ImGuiInputTextFlags_ReadOnly);
-					if(ImGui::DragInt("Base", &baseBlock.base, 1, minBase, maxBase, "%.0f"))
+
+					int base = static_cast<int>(baseBlock.base);
+					if(ImGui::DragInt("Base", &base, 1, minBase, maxBase, "%.0f"))
 					{
-						baseBlock.base = clamp(baseBlock.base, minBase, maxBase);
+						baseBlock.base = static_cast<unsigned int>(clamp(base, minBase, maxBase));
 						if(!ulltostr(value, baseBlock.base, baseBlock.txt, sizeof(baseBlock.txt)))
 						{
 							baseBlock.txt[0] = '\0';

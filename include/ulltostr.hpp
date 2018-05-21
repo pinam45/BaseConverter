@@ -30,7 +30,7 @@
 
 #include <cstdio>
 
-bool ulltostr(unsigned long long value, int base, char* str, size_t sz);
+bool ulltostr(unsigned long long value, unsigned int base, char* str, size_t sz);
 
 
 #endif //BASECONVERTER_ULLTOSTR_HPP
