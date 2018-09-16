@@ -130,6 +130,7 @@ int main()
 
 	sf::RenderWindow window(sf::VideoMode(300, 480), "Base converter");
 	window.setVerticalSyncEnabled(true);
+	window.setFramerateLimit(60);
 	ImGui::SFML::Init(window);
 
 	errno = 0;
