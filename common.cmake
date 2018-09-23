@@ -25,7 +25,7 @@
 include(CheckCXXCompilerFlag)
 include(CheckCCompilerFlag)
 
-## check_variable_name(function_name var_names... [USED used_var_names...])
+## check_variable_name(function_name var_names... USED used_var_names...)
 # Check if variables passed to a function don't have names conflicts with variables used in the function.
 # Generate a fatal error on variable name conflict.
 #   {value} [in] function_name:    Function name
@@ -855,15 +855,18 @@ function(make_target target group)
 	set_target_properties(${target} PROPERTIES FOLDER ${group})
 endfunction()
 
-## configure_folder(input_folder output_folder)
-# Recursively copie all files from an input folder to an output folder
+## configure_folder(input_folder output_folder [args...])
+# Recursively copy all files from an input folder to an output folder
+# Copy is made with CMake configure_file(), see documentation for more information:
+# https://cmake.org/cmake/help/latest/command/configure_file.html
 #   {value} [in] input_folder:    Input folder
 #   {value} [in] output_folder:   Output folder
+#   {value} [in] args:            CMake configure_file() additional arguments
 function(configure_folder input_folder output_folder)
-	file(GLOB_RECURSE files "${input_folder}" "${input_folder}/*")
+	file(GLOB_RECURSE files "${input_folder}/*")
 	foreach(file ${files})
 		file(RELATIVE_PATH relative_file ${input_folder} ${file})
-		configure_file(${file} "${output_folder}/${relative_file}" COPYONLY)
+		configure_file(${file} "${output_folder}/${relative_file}" ${ARGN})
 	endforeach()
 endfunction()
 
@@ -881,12 +884,14 @@ set(CMAKE_DISABLE_SOURCE_CHANGES ON)
 set(CMAKE_DISABLE_IN_SOURCE_BUILD ON)
 
 # place generated binaries in build/bin
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/build/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/bin)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/build/bin/)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELWITHDEBINFO ${CMAKE_BINARY_DIR}/build/bin/)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY_RELEASE ${CMAKE_BINARY_DIR}/build/bin/)
 
 # place generated libs in build/lib
+file(MAKE_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib)
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/build/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY_DEBUG ${CMAKE_BINARY_DIR}/build/lib/)
